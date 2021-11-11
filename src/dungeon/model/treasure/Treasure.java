@@ -1,8 +1,9 @@
-package dungeon.treasure;
+package dungeon.model.treasure;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * A class that represents a Treasure. It has a map of treasures, and a random function to get
@@ -46,6 +47,9 @@ public class Treasure implements ITreasure {
 
   @Override
   public String toString() {
-    return treasury.toString();
+    String commaSepValue = this.treasury.keySet().stream()
+            .map(key -> key + ": " + this.treasury.get(key))
+            .collect(Collectors.joining(", "));
+    return commaSepValue;
   }
 }

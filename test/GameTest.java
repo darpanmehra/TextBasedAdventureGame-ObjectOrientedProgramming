@@ -9,9 +9,9 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
-import dungeon.GameState;
-import dungeon.directions.Direction;
-import dungeon.location.ILocation;
+import dungeon.model.GameState;
+import dungeon.model.directions.Direction;
+import dungeon.model.location.ILocation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -152,6 +152,7 @@ public class GameTest {
     }
     assertTrue(correct);
   }
+
 
   @Test
   public void testTreasurePercentage() {
@@ -331,4 +332,43 @@ public class GameTest {
     return -1;
   }
 
+  //Project 4 tests
+
+  @Test
+  public void testMonstersLocation(){
+    model = new GameState(6, 6, interconnectivity,
+            "nonwrapping", 20, 15, random);
+
+    ILocation[][] dungeon = model.getDungeon();
+    boolean correct = true;
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (!dungeon[i][j].isCave() && dungeon[i][j].getMonster() != null) {
+          correct = false;
+        }
+      }
+    }
+    assertTrue(correct);
+  }
+
+  @Test
+  public void testMonsterNumber(){
+    model = new GameState(6, 6, interconnectivity,
+            "nonwrapping", 20, 5, random);
+
+    ILocation[][] dungeon = model.getDungeon();
+    int totalCaves = 0;
+    int cavesThatHaveMonsters = 0;
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (dungeon[i][j].isCave()) {
+          totalCaves = totalCaves + 1;
+          if (dungeon[i][j].getMonster() != null) {
+            cavesThatHaveMonsters = cavesThatHaveMonsters + 1;
+          }
+        }
+      }
+    }
+    assertEquals(5, cavesThatHaveMonsters);
+  }
 }

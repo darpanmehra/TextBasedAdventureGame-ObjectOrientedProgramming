@@ -1,11 +1,11 @@
-package dungeon.character;
+package dungeon.model.character;
 
 import java.util.List;
 import java.util.Map;
 
-import dungeon.location.ILocation;
-import dungeon.treasure.ITreasure;
-import dungeon.treasure.TreasureType;
+import dungeon.model.location.ILocation;
+import dungeon.model.treasure.ITreasure;
+import dungeon.model.treasure.TreasureType;
 
 /**
  * This class represents a character in the dungeon. This interface can be extended to a class that
@@ -21,11 +21,9 @@ public interface Character {
   String getName();
 
   /**
-   * This method is called when you need to add the treasure to the character.
-   *
-   * @param treasure the treasure to add.
+   * This method is called when you need to pick treasure from current location.
    */
-  void addTreasure(ITreasure treasure);
+  void pickTreasureFromCurrentLocation(TreasureType treasureType);
 
   /**
    * This method is called when you need to get the treasure the character holds.
@@ -61,5 +59,35 @@ public interface Character {
    * @return the travel information of the character.
    */
   String printTravelStatus();
+
+  /**
+   * This method is called when you need to get the health of the character.
+   *
+   * @return the health of the character.
+   */
+  int getHealth();
+
+  /**
+   * This method is called when you need to set the health of the character.
+   *
+   */
+  void decrementHealth();
+
+  /**
+   * Check if the character is alive.
+   * @return true if the character is alive, false otherwise.
+   */
+  boolean isAlive();
+
+  /**
+   * This method is called when you need to get the arrow count of the character.
+   * @return
+   */
+  int getArrowCount();
+
+  /**
+   * This method is called when you need to set the arrow count of the character.
+   */
+  void setArrowCount(int arrowCount);
 
 }

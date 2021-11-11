@@ -1,9 +1,11 @@
-package dungeon.location;
+package dungeon.model.location;
 
 import java.util.Map;
 
-import dungeon.directions.Direction;
-import dungeon.treasure.ITreasure;
+import dungeon.model.character.Character;
+import dungeon.model.directions.Direction;
+import dungeon.model.treasure.ITreasure;
+import dungeon.model.treasure.TreasureType;
 
 /**
  * Interface for a location in the dungeon. It has a name, a row and a column coordinate, neighbors,
@@ -70,20 +72,13 @@ public interface ILocation extends Comparable<ILocation> {
   /**
    * Set the treasure of the location as empty.
    */
-  void setTreasureEmpty();
+  ITreasure removeTreasure(TreasureType treasureType);
 
   /**
    * Set the treasure of the location.
    */
   void setTreasure();
 
-  /**
-   * Get the original treasure of the location (Treasure that was added originally - before a player
-   * collected it).
-   *
-   * @return the original treasure of the location.
-   */
-  ITreasure getOriginalTreasure();
 
   /**
    * Get the treasure of the location.
@@ -105,5 +100,10 @@ public interface ILocation extends Comparable<ILocation> {
    * @return the location information.
    */
   String printLocationInfo();
+
+
+  Character getMonster();
+
+  void setMonster();
 
 }

@@ -1,4 +1,4 @@
-package dungeon.treasure;
+package dungeon.model.treasure;
 
 import java.util.Map;
 

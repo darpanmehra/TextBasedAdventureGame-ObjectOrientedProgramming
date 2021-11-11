@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-import dungeon.character.Character;
-import dungeon.directions.Direction;
-import dungeon.location.ILocation;
+import dungeon.model.GameState;
+import dungeon.model.directions.Direction;
+import dungeon.model.location.ILocation;
 
 /**
  * Driver class for the Dungeon game.
@@ -25,16 +25,17 @@ public class Driver {
     int interConnectivity = Integer.parseInt(args[2]);
     String dungeonType = (args[3]).toLowerCase();
     int treasurePercentage = Integer.parseInt(args[4]);
+    int monsterCount = Integer.parseInt(args[5]);
 
     //Mock Random method
     Random rand = new Random();
-    rand.setSeed(20);
+    rand.setSeed(50);
 
     // Create a new dungeon- Initialize the model
     GameState model = new GameState(dungeonHeight, dungeonWidth, interConnectivity,
-            dungeonType, treasurePercentage, rand);
+            dungeonType, treasurePercentage, monsterCount, rand);
 
-    Character player = model.getPlayer();
+    //Character player = model.getPlayer();
 
     System.out.println("Welcome to the Dungeon! \n\n");
     ILocation playerStartLocation = model.getPlayerStartLocation();
@@ -59,7 +60,7 @@ public class Driver {
       System.out.println(model.getPlayer());
       List<Direction> availableDirections = model.getAvailableDirectionsFromPlayerPosition();
       System.out.println("Location originally had "
-              + model.getPlayerCurrentLocation().getOriginalTreasure()
+              + model.getPlayerCurrentLocation().getTreasure()
               + " treasures which the player acquired.");
       System.out.println("Available directions from current location: " + availableDirections);
       ILocation newLocation;

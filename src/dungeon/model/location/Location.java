@@ -1,13 +1,16 @@
-package dungeon.location;
+package dungeon.model.location;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import dungeon.directions.Direction;
-import dungeon.treasure.ITreasure;
-import dungeon.treasure.Treasure;
+import dungeon.model.character.Character;
+import dungeon.model.character.Monster;
+import dungeon.model.directions.Direction;
+import dungeon.model.treasure.ITreasure;
+import dungeon.model.treasure.Treasure;
+import dungeon.model.treasure.TreasureType;
 
 /**
  * A location in the dungeon. It has a name, coordinates, a map of neighbors, and a map of
@@ -19,8 +22,8 @@ public class Location implements ILocation {
   private final int[] coordinates = new int[2];
   private HashMap<Direction, ILocation> neighbours;
   private ITreasure treasure;
-  private ITreasure currentTreasure;
   private Random random;
+  private Character monster;
 
   /**
    * Constructor for a location.
@@ -44,7 +47,7 @@ public class Location implements ILocation {
     this.coordinates[1] = colCoordinate;
     this.neighbours = new HashMap<>();
     this.treasure = null;
-    this.currentTreasure = null;
+    this.monster = null;
     this.random = random;
   }
 
@@ -62,7 +65,7 @@ public class Location implements ILocation {
     this.coordinates[1] = loc.getColCoordinate();
     this.neighbours = new HashMap<>(loc.getNeighbours());
     this.treasure = loc.getTreasure();
-    this.currentTreasure = loc.getOriginalTreasure();
+    this.monster = loc.getMonster();
   }
 
   @Override
@@ -117,23 +120,26 @@ public class Location implements ILocation {
   public void setTreasure() {
     if (isCave()) {
       this.treasure = new Treasure(random);
-      this.currentTreasure = treasure;
     }
   }
 
   @Override
-  public void setTreasureEmpty() {
-    this.currentTreasure = null;
-  }
-
-  @Override
-  public ITreasure getOriginalTreasure() {
+  public ITreasure removeTreasure(TreasureType type) {
+    if (type == null) {
+      throw new IllegalArgumentException("Treasure type cannot be null");
+    }
+    if (this.treasure == null) {
+      return null;
+    }
+    if (this.treasure.getTreasure().containsKey(type)) {
+      this.treasure.getTreasure().put(type, this.treasure.getTreasure().get(type) - 1);
+    }
     return this.treasure;
   }
 
   @Override
   public ITreasure getTreasure() {
-    return this.currentTreasure;
+    return this.treasure;
   }
 
   @Override
@@ -168,8 +174,18 @@ public class Location implements ILocation {
 
   @Override
   public String printLocationInfo() {
-    return String.format("(%d, %d), treasure: %s, neighbours: %s", this.coordinates[0],
-            this.coordinates[1], this.currentTreasure, this.neighbours);
+    return String.format("(%d, %d), monster: %s, treasure: %s, neighbours: %s", this.coordinates[0],
+            this.coordinates[1], this.monster, this.treasure, this.neighbours);
+  }
+
+  @Override
+  public Character getMonster() {
+    return this.monster;
+  }
+
+  @Override
+  public void setMonster() {
+    this.monster = new Monster();
   }
 
 }

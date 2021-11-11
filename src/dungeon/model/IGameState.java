@@ -1,10 +1,13 @@
-package dungeon;
+package dungeon.model;
 
 import java.util.List;
 
-import dungeon.character.Character;
-import dungeon.directions.Direction;
-import dungeon.location.ILocation;
+import dungeon.model.character.Character;
+import dungeon.model.directions.Direction;
+import dungeon.model.location.ILocation;
+import dungeon.model.treasure.ITreasure;
+import dungeon.model.treasure.Treasure;
+import dungeon.model.treasure.TreasureType;
 
 /**
  * Interface for the game state. It is used by the client to interact with the game state.
@@ -73,4 +76,14 @@ public interface IGameState {
    * @return the player's travel history.
    */
   String printPlayerTravelStatus();
+
+  /**
+   * Get the player's current location status.
+   *
+   * @return the player's current location status.
+   */
+  String getPlayerCurrentLocationStatus();
+
+
+  void pickTreasureFromCurrentLocation(TreasureType treasureType);
 }

@@ -1,4 +1,4 @@
-package dungeon.directions;
+package dungeon.model.directions;
 
 /**
  * A direction in the dungeon a player can move and a location can have its neighbour.

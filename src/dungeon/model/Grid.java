@@ -1,4 +1,4 @@
-package dungeon;
+package dungeon.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,16 +12,17 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import dungeon.directions.Direction;
-import dungeon.location.ILocation;
-import dungeon.location.Location;
+import dungeon.model.character.Monster;
+import dungeon.model.directions.Direction;
+import dungeon.model.location.ILocation;
+import dungeon.model.location.Location;
 
 /**
  * A grid of locations which is a dungeon in the game. It is created randomly using the Kruskal's
  * algorithm for Minimum Spanning Tree. The inter-connectivity value adds those number of extra
  * paths in the dungeon randomly.
  */
-public class Grid {
+class Grid {
   private final Random random;
   private final ILocation[][] maze;
   private Set<SortedSet<ILocation>> potentialPaths;
@@ -97,6 +98,66 @@ public class Grid {
     assignTreasures(); //Assign treasure to the caves
 
     determineStartAndEndLocation(); //Assign start and end locations
+  }
+
+  protected Grid(int numRow, int numCol, int interConnectivity, String dungeonType,
+                 double treasurePercentage, int monsterCount, Random random) {
+
+    if (numRow < 6 || numRow > 100) {
+      throw new IllegalArgumentException("Dungeon width must be between 10 and 100");
+    }
+    if (numCol < 6 || numCol > 100) {
+      throw new IllegalArgumentException("Dungeon width must be between 10 and 100");
+    }
+    if (interConnectivity < 0) {
+      throw new IllegalArgumentException("Interconnectivity must be between 0 and dungeon size");
+    }
+    if (!(dungeonType.equalsIgnoreCase("wrapping")
+            || dungeonType.equalsIgnoreCase("nonwrapping"))) {
+      throw new IllegalArgumentException("Dungeon type must be wrapping or nonwrapping");
+    }
+    if (treasurePercentage < 0 || treasurePercentage > 100) {
+      throw new IllegalArgumentException("Treasure percentage must be between 0 and 100");
+    }
+    if (monsterCount < 1) {
+      throw new IllegalArgumentException("Monster count must be greater than 0");
+    }
+    if (random == null) {
+      throw new IllegalArgumentException("Random must be specified");
+    }
+
+    this.random = random;
+    maze = new ILocation[numRow][numCol];
+    this.treasurePercentage = treasurePercentage;
+
+    //Initialize data structures
+    potentialPaths = new HashSet<>();
+    kruskalLocationGroup = new ArrayList<>();
+    leftOverList = new ArrayList<>();
+    caveList = new ArrayList<>();
+    this.startLocation = null;
+    this.endLocation = null;
+
+    //Creating Dungeon
+    initializeLocations(); //Initialize locations in the maze
+
+    if (dungeonType.equalsIgnoreCase("nonwrapping")) {
+      updatePotentialPaths();
+    } else if (dungeonType.equalsIgnoreCase("wrapping")) {
+      updatePotentialPathsWrapping();
+    }
+
+    createDungeonUsingKruskal(); //Create a dungeon using the Kruskal's algorithm
+    addInterconnectivity(interConnectivity); //Add interconnectivity to the dungeon
+
+    //Get Cave Locations
+    caveList = getAllCavesInDungeon(); //Get the list of caves
+    assignTreasures(); //Assign treasure to the caves
+
+    determineStartAndEndLocation(); //Assign start and end locations
+
+    //Assign monsters to the dungeon
+    assignMonsters(monsterCount);
   }
 
   private void initializeLocations() {
@@ -320,20 +381,46 @@ public class Grid {
     return caveList;
   }
 
-  private void assignTreasures() {
-    int totalCaves = caveList.size();
-    double numberOfTreasuresCaves = Math.ceil(totalCaves * (treasurePercentage / 100));
-    for (double i = 0.0; i < numberOfTreasuresCaves; i++) {
-      int randomIndex = random.nextInt(caveList.size());
-      caveList.get(randomIndex).setTreasure();
-      caveList.remove(randomIndex);
-    }
-  }
-
   private void determineStartAndEndLocation() {
     int randomIndex = random.nextInt(caveList.size());
     startLocation = caveList.get(randomIndex);
     endLocation = modifiedBreadthFirstSearchToFindEnd(startLocation, MIN_PATH_LENGTH);
+  }
+  
+  private void assignTreasures() {
+    List<ILocation> caveListCopy = new ArrayList<>(caveList);
+    int totalCaves = caveListCopy.size();
+    double numberOfTreasuresCaves = Math.ceil(totalCaves * (treasurePercentage / 100));
+    for (double i = 0.0; i < numberOfTreasuresCaves; i++) {
+      int randomIndex = random.nextInt(caveListCopy.size());
+      caveListCopy.get(randomIndex).setTreasure();
+      caveListCopy.remove(randomIndex);
+    }
+  }
+
+  private void assignMonsters(int monsterCount) {
+    //Set a monster in the End Location
+    endLocation.setMonster();
+
+    List<ILocation> caveListCopy = new ArrayList<>(caveList);
+    int maxMonsterCount = monsterCount;
+    if (monsterCount > (caveListCopy.size() - 1)) {
+      maxMonsterCount = (caveListCopy.size() - 1);
+      System.out.println("Warning: Monster count is greater than the number of caves.  Setting monster count to " + maxMonsterCount);
+    }
+
+    while (maxMonsterCount > 1) {
+      int randomIndex = random.nextInt(caveListCopy.size());
+      ILocation randomLocation = caveListCopy.get(randomIndex);
+      if (randomLocation.equals(startLocation) || randomLocation.equals(endLocation)
+              || randomLocation.getMonster() != null) {
+        continue;
+      }
+      else {
+        randomLocation.setMonster();
+        maxMonsterCount--;
+      }
+    }
   }
 
   private ILocation modifiedBreadthFirstSearchToFindEnd(ILocation startLocation,

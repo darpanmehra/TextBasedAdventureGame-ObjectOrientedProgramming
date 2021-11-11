@@ -1,15 +1,17 @@
-package dungeon;
+package dungeon.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import dungeon.character.Character;
-import dungeon.character.Player;
-import dungeon.directions.Direction;
-import dungeon.location.ILocation;
-import dungeon.location.Location;
+import dungeon.model.character.Character;
+import dungeon.model.character.Player;
+import dungeon.model.directions.Direction;
+import dungeon.model.location.ILocation;
+import dungeon.model.location.Location;
+import dungeon.model.treasure.ITreasure;
+import dungeon.model.treasure.TreasureType;
 
 /**
  * The GameState class is used to keep track of the state of the game.
@@ -59,6 +61,40 @@ public class GameState implements IGameState {
     player.setCurrentLocation(dungeon.getPlayerStartLocation());
   }
 
+  // new Constructor with monsters
+  public GameState(int dungeonHeight, int dungeonWidth, int interConnectivity, String dungeonType,
+                   int treasurePercentage, int monsterCount, Random random) {
+    if (dungeonHeight < 6 || dungeonHeight > 100) {
+      throw new IllegalArgumentException("Dungeon width must be between 10 and 100");
+    }
+    if (dungeonWidth < 6 || dungeonWidth > 100) {
+      throw new IllegalArgumentException("Dungeon width must be between 10 and 100");
+    }
+    if (interConnectivity < 0) {
+      throw new IllegalArgumentException("Interconnectivity must be between 0 and dungeon size");
+    }
+    if (!(dungeonType.equalsIgnoreCase("wrapping")
+            || dungeonType.equalsIgnoreCase("nonwrapping"))) {
+      throw new IllegalArgumentException("Dungeon type must be wrapping or nonwrapping");
+    }
+    if (treasurePercentage < 0 || treasurePercentage > 100) {
+      throw new IllegalArgumentException("Treasure percentage must be between 0 and 100");
+    }
+    if (monsterCount < 1) {
+      throw new IllegalArgumentException("Monster count must be greater than 0");
+    }
+    if (random == null) {
+      throw new IllegalArgumentException("Random must be specified");
+    }
+
+    dungeon = new Grid(dungeonHeight, dungeonWidth, interConnectivity, dungeonType,
+            treasurePercentage, monsterCount, random);
+
+    //Create Player and assign start location
+    player = new Player("Player");
+    player.setCurrentLocation(dungeon.getPlayerStartLocation());
+  }
+
   @Override
   public boolean isGameOver() {
     return player.getCurrentLocation().equals(dungeon.getPlayerEndLocation());
@@ -88,6 +124,11 @@ public class GameState implements IGameState {
   }
 
   @Override
+  public void pickTreasureFromCurrentLocation(TreasureType treasureType) {
+    player.pickTreasureFromCurrentLocation(treasureType);
+  }
+
+  @Override
   public ILocation getPlayerStartLocation() {
     return dungeon.getPlayerStartLocation();
   }
@@ -110,5 +151,20 @@ public class GameState implements IGameState {
   @Override
   public String printPlayerTravelStatus() {
     return player.printTravelStatus();
+  }
+
+  @Override
+  public String getPlayerCurrentLocationStatus() {
+    List<Direction> doors = new ArrayList<>(dungeon.getNeighbours(player.getCurrentLocation()).keySet());
+    StringBuilder sb = new StringBuilder();
+    sb.append(player);
+    if (player.getCurrentLocation().getTreasure() != null) {
+      sb.append("You find ").append(player.getCurrentLocation().getTreasure().toString()).append("\n");
+    }
+    sb.append("Doors lead to: ").append(doors).append("\n");
+
+
+    sb.append("\n");
+    return sb.toString();
   }
 }

@@ -9,9 +9,9 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
-import dungeon.GameState;
-import dungeon.directions.Direction;
-import dungeon.location.ILocation;
+import dungeon.model.GameState;
+import dungeon.model.directions.Direction;
+import dungeon.model.location.ILocation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

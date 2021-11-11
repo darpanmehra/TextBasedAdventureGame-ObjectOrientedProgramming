@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import dungeon.treasure.ITreasure;
-import dungeon.treasure.Treasure;
-import dungeon.treasure.TreasureType;
+import dungeon.model.treasure.ITreasure;
+import dungeon.model.treasure.Treasure;
+import dungeon.model.treasure.TreasureType;
 
 import static org.junit.Assert.assertEquals;
 
