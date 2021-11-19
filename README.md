@@ -3,7 +3,7 @@
 * Class: **Programming Design Paradigms**
 * Professor: **Clark Freifeld** (Northeastern University)
 * Term: *Fall 2021*
-* Designed and developed: **Darpan Mehra** NUID- 001399321
+* Designed and developed: **Darpan Mehra**
 
 ## Overview - Project 4 Text-based Adventure Game
 
