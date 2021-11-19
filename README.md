@@ -1,6 +1,7 @@
 # About
 
-* Class: **Programming Design Paradigms**
+* Degree: Masters in Computer Science
+* Course: **CS5010 - Programming Design Paradigms** (Northeastern University)
 * Professor: **Clark Freifeld** (Northeastern University)
 * Term: *Fall 2021*
 * Designed and developed: **Darpan Mehra**
