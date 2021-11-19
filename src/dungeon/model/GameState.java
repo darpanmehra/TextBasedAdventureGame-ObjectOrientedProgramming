@@ -10,7 +10,6 @@ import dungeon.model.character.Player;
 import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
 import dungeon.model.location.Location;
-import dungeon.model.treasure.ITreasure;
 import dungeon.model.treasure.TreasureType;
 
 /**
@@ -57,11 +56,21 @@ public class GameState implements IGameState {
             treasurePercentage, random);
 
     //Create Player and assign start location
-    player = new Player("Player");
+    player = new Player("Player", random);
     player.setCurrentLocation(dungeon.getPlayerStartLocation());
   }
 
-  // new Constructor with monsters
+  /**
+   * Constructor for the GameState class.
+   *
+   * @param dungeonHeight      The height of the dungeon.
+   * @param dungeonWidth       The width of the dungeon.
+   * @param interConnectivity  The interconnectivity of the dungeon.
+   * @param dungeonType        The type of dungeon.
+   * @param treasurePercentage The percentage of treasure in the dungeon.
+   * @param monsterCount       The number of monsters in the dungeon.
+   * @param random             The random function for the dungeon.
+   */
   public GameState(int dungeonHeight, int dungeonWidth, int interConnectivity, String dungeonType,
                    int treasurePercentage, int monsterCount, Random random) {
     if (dungeonHeight < 6 || dungeonHeight > 100) {
@@ -91,18 +100,68 @@ public class GameState implements IGameState {
             treasurePercentage, monsterCount, random);
 
     //Create Player and assign start location
-    player = new Player("Player");
+    player = new Player("Player", random);
     player.setCurrentLocation(dungeon.getPlayerStartLocation());
   }
 
   @Override
-  public boolean isGameOver() {
-    return player.getCurrentLocation().equals(dungeon.getPlayerEndLocation());
+  public Character getPlayer() {
+    return player;
   }
 
   @Override
-  public Character getPlayer() {
-    return new Player(player);
+  public ILocation getPlayerStartLocation() {
+    return dungeon.getPlayerStartLocation();
+  }
+
+  @Override
+  public ILocation getPlayerEndLocation() {
+    return dungeon.getPlayerEndLocation();
+  }
+
+  @Override
+  public ILocation getPlayerCurrentLocation() {
+    return new Location(player.getCurrentLocation());
+  }
+
+  @Override
+  public String getPlayerCurrentLocationStatus() {
+
+    List<Direction> doors = new ArrayList<>(
+            dungeon.getNeighbours(player.getCurrentLocation()).keySet());
+    StringBuilder sb = new StringBuilder();
+
+    int monstersOneLocationAway = getMonstersOneLocationAway();
+    int monstersTwoLocationsAway = getMonstersTwoLocationsAway();
+
+    //If there are monsters one or two locations away, print them
+    if (monstersOneLocationAway == 1 || (monstersOneLocationAway + monstersTwoLocationsAway) > 1) {
+      sb.append("You smell something terrible nearby").append("\n"); //More pungent smell
+    } else if (monstersTwoLocationsAway == 1) { // Less pungent smell
+      sb.append("You slightly smell something nearby").append("\n");
+    }
+
+    //If there is a killed monster, print it
+    if (player.getCurrentLocation().getMonster() != null
+            && !player.getCurrentLocation().getMonster().isAlive()) {
+      sb.append("You see a dead monster here.").append("\n");
+    }
+
+    sb.append(player);
+    if (player.getTreasures().containsKey(TreasureType.ARROWS)
+            && player.getTreasures().get(TreasureType.ARROWS) <= 0) {
+      sb.append("You are out of arrows. Explore to find more.").append("\n");
+    }
+    if (player.getCurrentLocation().getTreasure() != null) {
+      if (player.getCurrentLocation().getTreasure().toString().length() > 0) {
+        sb.append("You find ").append(player.getCurrentLocation().getTreasure().toString())
+                .append("\n");
+      }
+    }
+    sb.append("Doors lead to: ").append(doors).append("\n");
+
+    sb.append("\n");
+    return sb.toString();
   }
 
   @Override
@@ -125,22 +184,15 @@ public class GameState implements IGameState {
 
   @Override
   public void pickTreasureFromCurrentLocation(TreasureType treasureType) {
+    if (treasureType == null) {
+      throw new IllegalArgumentException("Treasure type must be specified");
+    }
     player.pickTreasureFromCurrentLocation(treasureType);
   }
 
   @Override
-  public ILocation getPlayerStartLocation() {
-    return dungeon.getPlayerStartLocation();
-  }
-
-  @Override
-  public ILocation getPlayerEndLocation() {
-    return dungeon.getPlayerEndLocation();
-  }
-
-  @Override
-  public ILocation getPlayerCurrentLocation() {
-    return new Location(player.getCurrentLocation());
+  public void shootArrow(Direction direction, int distance) {
+    player.shootArrow(direction, distance);
   }
 
   @Override
@@ -149,22 +201,52 @@ public class GameState implements IGameState {
   }
 
   @Override
+  public boolean isGameOver() {
+    return (player.getCurrentLocation().equals(dungeon.getPlayerEndLocation())
+            || !player.isAlive());
+  }
+
+  @Override
+  public String getGameOverStatus() {
+    if (isGameOver()) {
+      if (player.isAlive() && player.getCurrentLocation().equals(dungeon.getPlayerEndLocation())) {
+        return "You win! You made it to the end.\n";
+      } else if (!player.isAlive()) {
+        return "Chomp, chomp, chomp, you are eaten by an Otyugh!\nBetter luck next time.\n";
+      }
+    }
+    return "Game not over yet!\n";
+  }
+
+  @Override
   public String printPlayerTravelStatus() {
     return player.printTravelStatus();
   }
 
-  @Override
-  public String getPlayerCurrentLocationStatus() {
-    List<Direction> doors = new ArrayList<>(dungeon.getNeighbours(player.getCurrentLocation()).keySet());
-    StringBuilder sb = new StringBuilder();
-    sb.append(player);
-    if (player.getCurrentLocation().getTreasure() != null) {
-      sb.append("You find ").append(player.getCurrentLocation().getTreasure().toString()).append("\n");
+  //Private methods
+  private int getMonstersTwoLocationsAway() {
+    List<ILocation> locations = dungeon.getLocationsAway(
+            player.getCurrentLocation(), 2);
+    int monsters = 0;
+    for (ILocation location : locations) {
+      if (location.getMonster() != null && location.getMonster().isAlive()) {
+        monsters++;
+      }
     }
-    sb.append("Doors lead to: ").append(doors).append("\n");
-
-
-    sb.append("\n");
-    return sb.toString();
+    return monsters;
   }
+
+  private int getMonstersOneLocationAway() {
+    List<ILocation> locations = dungeon.getLocationsAway(
+            player.getCurrentLocation(), 1);
+    int monsters = 0;
+    for (ILocation location : locations) {
+      if (location.getMonster() != null && location.getMonster().isAlive()) {
+        monsters++;
+      }
+    }
+    return monsters;
+  }
+
+
 }

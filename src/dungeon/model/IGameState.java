@@ -5,8 +5,6 @@ import java.util.List;
 import dungeon.model.character.Character;
 import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
-import dungeon.model.treasure.ITreasure;
-import dungeon.model.treasure.Treasure;
 import dungeon.model.treasure.TreasureType;
 
 /**
@@ -20,20 +18,6 @@ public interface IGameState {
    * @return the character in the game.
    */
   Character getPlayer();
-
-  /**
-   * Get if the game is over or not.
-   *
-   * @return true if the game is over, false otherwise.
-   */
-  boolean isGameOver();
-
-  /**
-   * Get the list of available directions to move to from the player's current location.
-   *
-   * @return the list of available directions to move to from the player's current location.
-   */
-  List<Direction> getAvailableDirectionsFromPlayerPosition();
 
   /**
    * Get the start location of the player.
@@ -56,12 +40,39 @@ public interface IGameState {
   ILocation getPlayerCurrentLocation();
 
   /**
+   * Get the player's current location status.
+   *
+   * @return the player's current location status.
+   */
+  String getPlayerCurrentLocationStatus();
+
+  /**
+   * Get the list of available directions to move to from the player's current location.
+   *
+   * @return the list of available directions to move to from the player's current location.
+   */
+  List<Direction> getAvailableDirectionsFromPlayerPosition();
+
+  /**
    * Get the current location of the player.
    *
    * @param direction the direction to move to.
    * @return the current location of the player.
    */
   ILocation movePlayer(Direction direction);
+
+  /**
+   * Pick up the treasure in the current location.
+   * @param treasureType the treasure type to pick up.
+   */
+  void pickTreasureFromCurrentLocation(TreasureType treasureType);
+
+  /**
+   * Shoot the arrow in the given direction and the given distance.
+   * @param direction the direction to shoot.
+   * @param distance the distance to shoot (number of caves).
+   */
+  void shootArrow(Direction direction, int distance);
 
   /**
    * Get the copy of the game dungeon.
@@ -71,19 +82,22 @@ public interface IGameState {
   ILocation[][] getDungeon();
 
   /**
+   * Get if the game is over or not.
+   *
+   * @return true if the game is over, false otherwise.
+   */
+  boolean isGameOver();
+
+  /**
+   * Get the status of the game when it is over.
+   * @return the status of the game when it is over.
+   */
+  String getGameOverStatus();
+
+  /**
    * Get the player's travel history.
    *
    * @return the player's travel history.
    */
   String printPlayerTravelStatus();
-
-  /**
-   * Get the player's current location status.
-   *
-   * @return the player's current location status.
-   */
-  String getPlayerCurrentLocationStatus();
-
-
-  void pickTreasureFromCurrentLocation(TreasureType treasureType);
 }

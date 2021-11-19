@@ -9,8 +9,12 @@ import dungeon.model.location.ILocation;
 import dungeon.model.location.Location;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * This class tests the Monster class.
+ */
 public class MonsterTest {
 
   private Character monster;
@@ -27,28 +31,30 @@ public class MonsterTest {
 
   @Test
   public void getHealth() {
-    assertEquals(2, monster.getHealth());
+    assertEquals(100, monster.getHealth());
   }
 
   @Test
   public void decrementHealth() {
     monster.decrementHealth();
-    assertEquals(1, monster.getHealth());
+    assertEquals(50, monster.getHealth());
   }
 
   @Test
   public void killMonster() {
+    assertTrue(monster.isAlive());
     monster.decrementHealth();
     monster.decrementHealth();
     assertEquals(0, monster.getHealth());
+    assertFalse(monster.isAlive());
   }
 
   @Test
   public void testAlive() {
     assertTrue(monster.isAlive());
-
-    monster.decrementHealth();
-    monster.decrementHealth();
+    //Decrement health to 0
+    monster.decrementHealth(); //First hit will decrement health to 50 (half)
+    monster.decrementHealth(); //Second hit will decrement health to 0 (kill)
     assertTrue(!monster.isAlive());
   }
 
@@ -70,4 +76,22 @@ public class MonsterTest {
     assertEquals(location, monster.getCurrentLocation());
   }
 
+  @Test
+  public void testGetName() {
+    assertEquals("Otyugh", monster.getName());
+  }
+
+  @Test
+  public void isAlive() {
+    assertEquals(true, monster.isAlive());
+    monster.decrementHealth();
+    assertEquals(true, monster.isAlive());
+    monster.decrementHealth();
+    assertEquals(false, monster.isAlive());
+  }
+
+  @Test
+  public void testToString() {
+    assertEquals("Otyugh with health 100", monster.toString());
+  }
 }

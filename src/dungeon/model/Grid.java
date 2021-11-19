@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import dungeon.model.character.Monster;
 import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
 import dungeon.model.location.Location;
@@ -100,6 +99,17 @@ class Grid {
     determineStartAndEndLocation(); //Assign start and end locations
   }
 
+  /**
+   * Constructor for the Grid.
+   *
+   * @param numRow             the width of the grid
+   * @param numCol             the height of the grid
+   * @param interConnectivity  the number of extra paths to add to the grid
+   * @param dungeonType        the type of dungeon to create
+   * @param treasurePercentage the percentage of treasure in the grid
+   * @param monsterCount       the number of monsters in the dungeon
+   * @param random             the random number generator
+   */
   protected Grid(int numRow, int numCol, int interConnectivity, String dungeonType,
                  double treasurePercentage, int monsterCount, Random random) {
 
@@ -153,6 +163,7 @@ class Grid {
     //Get Cave Locations
     caveList = getAllCavesInDungeon(); //Get the list of caves
     assignTreasures(); //Assign treasure to the caves
+    assignArrows(); //Assign arrows to the caves
 
     determineStartAndEndLocation(); //Assign start and end locations
 
@@ -386,7 +397,7 @@ class Grid {
     startLocation = caveList.get(randomIndex);
     endLocation = modifiedBreadthFirstSearchToFindEnd(startLocation, MIN_PATH_LENGTH);
   }
-  
+
   private void assignTreasures() {
     List<ILocation> caveListCopy = new ArrayList<>(caveList);
     int totalCaves = caveListCopy.size();
@@ -398,6 +409,16 @@ class Grid {
     }
   }
 
+  private void assignArrows() {
+    double numberOfTreasuresCaves = Math.ceil(maze.length * maze[0].length
+            * (treasurePercentage / 100));
+    for (double i = 0.0; i < numberOfTreasuresCaves; i++) {
+      int randomRow = random.nextInt(maze.length);
+      int randomCol = random.nextInt(maze[0].length);
+      maze[randomRow][randomCol].addArrow();
+    }
+  }
+
   private void assignMonsters(int monsterCount) {
     //Set a monster in the End Location
     endLocation.setMonster();
@@ -406,7 +427,8 @@ class Grid {
     int maxMonsterCount = monsterCount;
     if (monsterCount > (caveListCopy.size() - 1)) {
       maxMonsterCount = (caveListCopy.size() - 1);
-      System.out.println("Warning: Monster count is greater than the number of caves.  Setting monster count to " + maxMonsterCount);
+      System.out.println("Warning: Monster count is greater than the number of caves. "
+              + "Setting monster count to " + maxMonsterCount);
     }
 
     while (maxMonsterCount > 1) {
@@ -415,8 +437,7 @@ class Grid {
       if (randomLocation.equals(startLocation) || randomLocation.equals(endLocation)
               || randomLocation.getMonster() != null) {
         continue;
-      }
-      else {
+      } else {
         randomLocation.setMonster();
         maxMonsterCount--;
       }
@@ -488,4 +509,45 @@ class Grid {
     return dungeonCopy;
   }
 
+  protected List<ILocation> getLocationsAway(ILocation startLocation, int minPathLength) {
+
+    List<ILocation> locationsAway = new ArrayList<>();
+
+    Set<ILocation> visited = new HashSet<>();
+    Integer level = 0;
+    Queue<Map<ILocation, Integer>> objects = new LinkedList<>();
+    Map<ILocation, Integer> map = new HashMap<>();
+    map.put(startLocation, level);
+    objects.add(map);
+    ILocation currentLocation = startLocation;
+
+
+    while (true) {
+
+      Map<ILocation, Integer> current = objects.remove();
+      for (ILocation location : current.keySet()) {
+        currentLocation = location;
+      }
+      int currentLevel = current.get(currentLocation);
+      if (currentLevel > minPathLength) {
+        return locationsAway;
+      }
+      // if we have found the location at the desired distance, add it to the list.
+      if (currentLevel == minPathLength) {
+        locationsAway.add(currentLocation);
+      }
+      visited.add(currentLocation);
+
+      // add all the adjacent locations to the queue
+      for (ILocation value : currentLocation.getNeighbours().values()) {
+        if (value != null) {
+          if (!visited.contains(value)) {
+            Map<ILocation, Integer> newMap = new HashMap<>();
+            newMap.put(value, currentLevel + 1);
+            objects.add(newMap);
+          }
+        }
+      }
+    }
+  }
 }

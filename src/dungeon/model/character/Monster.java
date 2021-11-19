@@ -4,19 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
-import dungeon.model.treasure.ITreasure;
 import dungeon.model.treasure.TreasureType;
 
+/**
+ * A monster is a character that can be encountered in the dungeon.
+ */
 public class Monster implements Character {
 
-  private String name;
+  static private final int MAX_HEALTH = 100;
+  private final String name;
   private int health;
   private ILocation currentLocation;
 
+  /**
+   * Constructor for a monster.
+   */
   public Monster() {
     this.name = "Otyugh";
-    this.health = 2;
+    this.health = MAX_HEALTH;
   }
 
   @Override
@@ -26,6 +33,7 @@ public class Monster implements Character {
 
   @Override
   public void pickTreasureFromCurrentLocation(TreasureType treasureType) {
+    //A monsters cannot pick up treasure
   }
 
   @Override
@@ -42,7 +50,6 @@ public class Monster implements Character {
   public ILocation getCurrentLocation() {
     return this.currentLocation;
   }
-
 
   @Override
   public List<ILocation> getLocationVisited() {
@@ -61,7 +68,7 @@ public class Monster implements Character {
 
   @Override
   public void decrementHealth() {
-    this.health--;
+    this.health = this.health - 50;
   }
 
   @Override
@@ -70,16 +77,12 @@ public class Monster implements Character {
   }
 
   @Override
-  public int getArrowCount() {
-    return 0;
-  }
-
-  @Override
-  public void setArrowCount(int count) {
+  public void shootArrow(Direction direction, int distance) {
+    //A monster cannot shoot arrows
   }
 
   @Override
   public String toString() {
-    return this.name + ": " + this.health + " health";
+    return this.name + " with health " + this.health;
   }
 }

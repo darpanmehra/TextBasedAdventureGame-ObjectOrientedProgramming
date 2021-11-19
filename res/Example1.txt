@@ -1,0 +1,99 @@
+Welcome to the dungeon!
+
+You are in a cave and you have 3 Arrows.
+You find 9 Rubies, 9 Diamonds, 3 Sapphires
+Doors lead to: [EAST, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? P
+Pickup what? ruby
+Picking up Rubies
+
+You are in a cave and you have 1 Rubies, 3 Arrows.
+You find 8 Rubies, 9 Diamonds, 3 Sapphires
+Doors lead to: [EAST, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? P
+Pickup what? diamond
+Picking up Diamonds
+
+You are in a cave and you have 1 Diamonds, 1 Rubies, 3 Arrows.
+You find 8 Rubies, 8 Diamonds, 3 Sapphires
+Doors lead to: [EAST, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? east
+Moving EAST
+
+You are in a cave and you have 1 Diamonds, 1 Rubies, 3 Arrows.
+You find 8 Rubies, 3 Diamonds, 10 Sapphires
+Doors lead to: [EAST, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? east
+Moving EAST
+
+You are in a cave and you have 1 Diamonds, 1 Rubies, 3 Arrows.
+You find 5 Rubies, 9 Diamonds, 7 Sapphires, 1 Arrows
+Doors lead to: [SOUTH, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? P
+Pickup what? arrow
+Picking up Arrows
+
+You are in a cave and you have 1 Diamonds, 1 Rubies, 4 Arrows.
+You find 5 Rubies, 9 Diamonds, 7 Sapphires
+Doors lead to: [SOUTH, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? south
+Moving SOUTH
+
+You slightly smell something nearby
+You are in a cave and you have 1 Diamonds, 1 Rubies, 4 Arrows.
+You find 1 Rubies, 9 Diamonds, 1 Sapphires, 1 Arrows
+Doors lead to: [SOUTH, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? P
+Pickup what? arrow
+Picking up Arrows
+
+You slightly smell something nearby
+You are in a cave and you have 1 Diamonds, 1 Rubies, 5 Arrows.
+You find 1 Rubies, 9 Diamonds, 1 Sapphires
+Doors lead to: [SOUTH, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? south
+Moving SOUTH
+
+You smell something terrible nearby
+You are in a tunnel and you have 1 Diamonds, 1 Rubies, 5 Arrows.
+You find 2 Arrows
+Doors lead to: [NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? S
+Which direction? west
+No.of caves (1-5)? 1
+Shooting in WEST at distance of 1
+
+You smell something terrible nearby
+You are in a tunnel and you have 1 Diamonds, 1 Rubies, 4 Arrows.
+You find 2 Arrows
+Doors lead to: [NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? S
+Which direction? west
+No.of caves (1-5)? 1
+Shooting in WEST at distance of 1
+
+You are in a tunnel and you have 1 Diamonds, 1 Rubies, 3 Arrows.
+You find 2 Arrows
+Doors lead to: [NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? west
+Moving WEST
+
+Game Over!
+You win! You made it to the end.
+Process finished with exit code 0

@@ -79,6 +79,10 @@ public interface ILocation extends Comparable<ILocation> {
    */
   void setTreasure();
 
+  /**
+   * Add 1 arrow in the location.
+   */
+  void addArrow();
 
   /**
    * Get the treasure of the location.
@@ -101,9 +105,20 @@ public interface ILocation extends Comparable<ILocation> {
    */
   String printLocationInfo();
 
-
+  /**
+   * Get the monster of the location.
+   * @return the monster of the location.
+   */
   Character getMonster();
 
+  /**
+   * Set the monster of the location.
+   */
   void setMonster();
 
+  /**
+   * Get if the location has a monster or not.
+   * @return true if the location has a monster, false otherwise.
+   */
+  boolean hasMonster();
 }

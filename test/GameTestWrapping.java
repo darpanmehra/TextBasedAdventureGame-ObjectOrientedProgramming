@@ -12,10 +12,12 @@ import java.util.Set;
 import dungeon.model.GameState;
 import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
+import dungeon.model.treasure.TreasureType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the wrapping of the game.
@@ -31,8 +33,8 @@ public class GameTestWrapping {
     random = new Random();
     random.setSeed(50);
     interconnectivity = 0;
-    model = new GameState(10, 10, interconnectivity,
-            "wrapping", 20, random);
+    model = new GameState(6, 6, interconnectivity,
+            "wrapping", 20, 5, random);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -42,6 +44,12 @@ public class GameTestWrapping {
             "wrapping", 20, null);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidMonsterCount() {
+    model = new GameState(6, 6, -1,
+            "wrapping", 20, -1, random);
+  }
+
   @Test
   public void getPlayer() {
     assertEquals("Player", model.getPlayer().getName());
@@ -49,79 +57,74 @@ public class GameTestWrapping {
 
   @Test
   public void isGameOver() {
-    model = new GameState(6, 6, 10000,
-            "wrapping", 20, random);
 
     //When player is at start location
     assertFalse(model.isGameOver());
 
     //Move player to end location
-    model.movePlayer(Direction.NORTH);
-    model.movePlayer(Direction.NORTH);
-    model.movePlayer(Direction.NORTH);
-    model.movePlayer(Direction.NORTH);
     model.movePlayer(Direction.EAST);
     model.movePlayer(Direction.EAST);
+    model.movePlayer(Direction.NORTH);
     model.movePlayer(Direction.EAST);
 
+    //Shoot arrow at end location to kill monster at end location
+    model.shootArrow(Direction.EAST, 1);
+    model.shootArrow(Direction.EAST, 1);
+    //Check if player has 1 arrow left
+    int arrows = model.getPlayer().getTreasures().get(TreasureType.ARROWS);
+    assertTrue(arrows == 1);
+
+    //Move player to final location
+    model.movePlayer(Direction.EAST);
     //Check if the game is over
     assertTrue(model.isGameOver());
   }
 
   @Test
   public void getAvailableDirectionsFromPlayerPosition() {
-    assertEquals("[SOUTH, EAST, WEST]",
+    assertEquals("[EAST, NORTH, SOUTH]",
             model.getAvailableDirectionsFromPlayerPosition().toString());
     assertEquals(3, model.getAvailableDirectionsFromPlayerPosition().size());
   }
 
   @Test
   public void getPlayerStartLocation() {
-    assertEquals("(2, 4)", model.getPlayerStartLocation().toString());
+    assertEquals("(5, 0)", model.getPlayerStartLocation().toString());
   }
 
   @Test
   public void getPlayerEndLocation() {
-    assertEquals("(4, 7)", model.getPlayerEndLocation().toString());
+    assertEquals("(4, 4)", model.getPlayerEndLocation().toString());
   }
 
   @Test
   public void movePlayer() {
-    //Print dungeon to console
-    ILocation[][] dungeon = model.getDungeon();
-    StringBuilder dungeonBuilder = new StringBuilder();
-    for (int i = 0; i < dungeon.length; i++) {
-      for (int j = 0; j < dungeon[i].length; j++) {
-        dungeonBuilder.append(dungeon[i][j].printLocationInfo());
-        dungeonBuilder.append("\n");
-      }
-    }
-    System.out.println(dungeonBuilder);
-    assertEquals("(2, 4)", model.getPlayer().getCurrentLocation().toString());
+
+    assertEquals("(5, 0)", model.getPlayer().getCurrentLocation().toString());
 
     //non-wrapping move
     model.movePlayer(Direction.EAST);
-    assertEquals("(2, 5)", model.getPlayer().getCurrentLocation().toString());
+    assertEquals("(5, 1)", model.getPlayer().getCurrentLocation().toString());
+    model.movePlayer(Direction.WEST); //back to start
 
     //wrapping move top - down
-    model.movePlayer(Direction.NORTH); // goes to (1, 5)
-    model.movePlayer(Direction.NORTH); // goes to (0, 5)
-    model.movePlayer(Direction.EAST); // goes to (0, 6)
-    model.movePlayer(Direction.NORTH); //Should wrap to (9, 6)
-    assertEquals("(9, 6)", model.getPlayer().getCurrentLocation().toString());
+    model.movePlayer(Direction.SOUTH); // goes to (0, 0)
+    assertEquals("(0, 0)", model.getPlayer().getCurrentLocation().toString());
 
     // Wrapping move right - left
-    model.movePlayer(Direction.EAST); // goes to (9, 7)
-    model.movePlayer(Direction.EAST); // goes to (9, 8)
-    model.movePlayer(Direction.NORTH); //goes to (8, 8)
-    model.movePlayer(Direction.EAST); // goes to (8, 9)
-    model.movePlayer(Direction.EAST); // wrapping move - goes to (8, 0)
-    assertEquals("(8, 0)", model.getPlayer().getCurrentLocation().toString());
+    model.movePlayer(Direction.NORTH); // goes to (5, 0)
+    model.movePlayer(Direction.NORTH); // goes to (4, 0)
+    model.movePlayer(Direction.EAST); //goes to (4, 1)
+    model.movePlayer(Direction.NORTH); // goes to (3, 1)
+    model.movePlayer(Direction.WEST); // goes to (3, 0)
+    model.movePlayer(Direction.NORTH); // goes to (2, 0)
+    model.movePlayer(Direction.WEST); // wrapping move - goes to (2, 5)
+    assertEquals("(2, 5)", model.getPlayer().getCurrentLocation().toString());
   }
 
   @Test
   public void testPlayerCurrentCLocation() {
-    assertEquals("(2, 4)", model.getPlayerCurrentLocation().toString());
+    assertEquals("(5, 0)", model.getPlayerCurrentLocation().toString());
   }
 
   @Test
@@ -156,12 +159,13 @@ public class GameTestWrapping {
   }
 
   @Test
-  public void TestTreasureInRightLocation() {
+  public void testTreasureInRightLocation() {
     ILocation[][] dungeon = model.getDungeon();
     boolean correct = true;
     for (int i = 0; i < dungeon.length; i++) {
       for (int j = 0; j < dungeon[i].length; j++) {
-        if (!dungeon[i][j].isCave() && dungeon[i][j].getTreasure() != null) {
+        if (!dungeon[i][j].isCave() && dungeon[i][j].getTreasure() != null
+                && !dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.ARROWS)) {
           correct = false;
         }
       }
@@ -170,7 +174,7 @@ public class GameTestWrapping {
   }
 
   @Test
-  public void TestTreasurePercentage() {
+  public void testTreasurePercentage() {
     ILocation[][] dungeon = model.getDungeon();
     double caves = 0.0;
     double cavesThatHaveTreasure = 0.0;
@@ -178,58 +182,120 @@ public class GameTestWrapping {
       for (int j = 0; j < dungeon[i].length; j++) {
         if (dungeon[i][j].isCave()) {
           caves = caves + 1;
-          if (dungeon[i][j].getTreasure() != null) {
+          if (dungeon[i][j].getTreasure() != null
+                  && dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.DIAMONDS)
+                  && dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.SAPPHIRES)
+                  && dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.RUBIES)
+          ) {
             cavesThatHaveTreasure = cavesThatHaveTreasure + 1;
           }
         }
       }
     }
+
     double ans = cavesThatHaveTreasure / caves;
-    assertEquals(Math.floor(ans * 100.00), 20.00, 0.001);
+    assertTrue(Math.floor(ans * 100.00) >= 20);
+  }
+
+  @Test
+  public void testArrowsCount() {
+    ILocation[][] dungeon = model.getDungeon();
+    double totalLocations = model.getDungeon().length * model.getDungeon()[0].length;
+    double locationsWithArrows = 0;
+
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (dungeon[i][j].getTreasure() != null
+                && dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.ARROWS)) {
+          locationsWithArrows = locationsWithArrows
+                  + dungeon[i][j].getTreasure().getTreasure().get(TreasureType.ARROWS);
+        }
+      }
+    }
+
+    double ans = locationsWithArrows / totalLocations;
+
+    assertEquals(Math.floor(ans * 100.00) >= 20, true);
+  }
+
+  @Test
+  public void testMonstersLocation() {
+    model = new GameState(6, 6, interconnectivity,
+            "nonwrapping", 20, 15, random);
+
+    ILocation[][] dungeon = model.getDungeon();
+    boolean correct = true;
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (!dungeon[i][j].isCave() && dungeon[i][j].getMonster() != null) {
+          correct = false;
+        }
+      }
+    }
+    assertTrue(correct);
+  }
+
+  @Test
+  public void testMonsterNumber() {
+    model = new GameState(6, 6, interconnectivity,
+            "nonwrapping", 20, 5, random);
+
+    ILocation[][] dungeon = model.getDungeon();
+    int totalCaves = 0;
+    int cavesThatHaveMonsters = 0;
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (dungeon[i][j].isCave()) {
+          totalCaves = totalCaves + 1;
+          if (dungeon[i][j].getMonster() != null) {
+            cavesThatHaveMonsters = cavesThatHaveMonsters + 1;
+          }
+        }
+      }
+    }
+    assertEquals(5, cavesThatHaveMonsters);
   }
 
   @Test
   public void printPlayerTravelStatus() {
-    assertEquals("Player has traveled to the following locations: [(2, 4) ].\n" +
-            "Treasures: {}", model.printPlayerTravelStatus());
+    assertEquals("Player has traveled to the following locations: "
+            + "[(5, 0)] and has 3 Arrows", model.printPlayerTravelStatus());
   }
 
   @Test
   public void playerPickingTreasure() {
+    model.pickTreasureFromCurrentLocation(TreasureType.ARROWS);
+    int count = model.getPlayer().getTreasures().get(TreasureType.ARROWS);
+    assertEquals(count, 4);
+    model.movePlayer(Direction.NORTH);
     model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.SOUTH);
-    model.movePlayer(Direction.SOUTH);
+    model.movePlayer(Direction.NORTH);
+    model.movePlayer(Direction.WEST);
+    model.movePlayer(Direction.NORTH);
     model.movePlayer(Direction.WEST);
     model.movePlayer(Direction.WEST);
-    model.movePlayer(Direction.SOUTH);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-    assertEquals("Player has traveled to the following locations: [(2, 4) (2, 5) (2, 6) " +
-            "(3, 6) (4, 6) (4, 5) (4, 4) (5, 4) (5, 5) (5, 6) ].\n" +
-            "Treasures: {DIAMONDS=14, RUBIES=9, SAPPHIRES=15}", model.printPlayerTravelStatus());
-  }
+    //Pick up the treasure - Diamonds
+    model.pickTreasureFromCurrentLocation(TreasureType.DIAMONDS);
+    model.pickTreasureFromCurrentLocation(TreasureType.DIAMONDS);
+    count = model.getPlayer().getTreasures().get(TreasureType.DIAMONDS);
+    assertEquals(count, 2);
 
-  @Test
-  public void treasureNullAfterPick() {
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.SOUTH); // goes to (3, 6) and collects treasure
-    assertEquals("Player has traveled to the following locations: [(2, 4) (2, 5) " +
-            "(2, 6) (3, 6) ].\n" +
-            "Treasures: {DIAMONDS=7, RUBIES=2, SAPPHIRES=9}", model.printPlayerTravelStatus());
+    //Pick up the treasure - Sapphires
+    model.pickTreasureFromCurrentLocation(TreasureType.SAPPHIRES);
+    count = model.getPlayer().getTreasures().get(TreasureType.SAPPHIRES);
+    assertEquals(count, 1);
 
-    model.movePlayer(Direction.WEST); // goes to (3, 5)
-    model.movePlayer(Direction.EAST); // goes to (3, 6) - comes back to same location where treasure
-
-    assertEquals("Player has traveled to the following locations: [(2, 4) (2, 5) " +
-            "(2, 6) (3, 6) (3, 5) (3, 6) ].\n" +
-            "Treasures: {DIAMONDS=7, RUBIES=2, SAPPHIRES=9}", model.printPlayerTravelStatus());
+    //Pick up the treasure - Rubies
+    model.pickTreasureFromCurrentLocation(TreasureType.RUBIES);
+    model.pickTreasureFromCurrentLocation(TreasureType.RUBIES);
+    model.pickTreasureFromCurrentLocation(TreasureType.RUBIES);
+    count = model.getPlayer().getTreasures().get(TreasureType.RUBIES);
+    assertEquals(count, 3);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testIllegalMove() {
-    model.movePlayer(Direction.NORTH); // Can't move to NORTH as it's a wall
+    model.movePlayer(Direction.WEST); // Can't move to West as it's a wall
   }
 
   @Test
@@ -290,7 +356,6 @@ public class GameTestWrapping {
       ILocation end = model.getPlayerEndLocation(); // selects a random cave as end
 
       assertTrue(checkDistance(start, end) >= 5);
-
     }
   }
 
@@ -298,31 +363,19 @@ public class GameTestWrapping {
   public void playerMovementsAllDirections() {
     model = new GameState(6, 10, 1000,
             "wrapping", 20, random);
+    try {
+      //Move in South direction
+      model.movePlayer(Direction.SOUTH);
+      //Move in North direction
+      model.movePlayer(Direction.NORTH);
+      //Move in East direction
+      model.movePlayer(Direction.EAST);
+      //Move in West direction
+      model.movePlayer(Direction.WEST);
 
-    //North movement
-    assertEquals("[SOUTH, WEST, EAST, NORTH]",
-            model.getAvailableDirectionsFromPlayerPosition().toString());
-    model.movePlayer(Direction.NORTH);
-    assertEquals("(3, 8)", model.getPlayerCurrentLocation().toString());
-
-    //South movement
-    assertEquals("[EAST, WEST, SOUTH, NORTH]",
-            model.getAvailableDirectionsFromPlayerPosition().toString());
-    model.movePlayer(Direction.SOUTH);
-    assertEquals("(4, 8)", model.getPlayerCurrentLocation().toString());
-
-    //East movement
-    assertEquals("[WEST, EAST, SOUTH, NORTH]",
-            model.getAvailableDirectionsFromPlayerPosition().toString());
-    model.movePlayer(Direction.EAST);
-    assertEquals("(4, 9)", model.getPlayerCurrentLocation().toString());
-
-    //West movement
-    assertEquals("[WEST, EAST, SOUTH, NORTH]",
-            model.getAvailableDirectionsFromPlayerPosition().toString());
-    model.movePlayer(Direction.WEST);
-    assertEquals("(4, 8)", model.getPlayerCurrentLocation().toString());
-
+    } catch (IllegalArgumentException e) {
+      fail("Fails if player cannot move in the direction");
+    }
   }
 
   private int checkDistance(ILocation startLocation, ILocation endLocation) {

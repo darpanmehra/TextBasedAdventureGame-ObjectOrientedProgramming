@@ -3,8 +3,8 @@ package dungeon.model.character;
 import java.util.List;
 import java.util.Map;
 
+import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
-import dungeon.model.treasure.ITreasure;
 import dungeon.model.treasure.TreasureType;
 
 /**
@@ -80,14 +80,10 @@ public interface Character {
   boolean isAlive();
 
   /**
-   * This method is called when you need to get the arrow count of the character.
-   * @return
+   This method is called when you need to shoot the arrow in the given direction with
+   * the cave distance.
+   * @param direction the direction to shoot the arrow.
+   * @param distance the distance to shoot the arrow (no.of caves).
    */
-  int getArrowCount();
-
-  /**
-   * This method is called when you need to set the arrow count of the character.
-   */
-  void setArrowCount(int arrowCount);
-
+  void shootArrow(Direction direction, int distance);
 }

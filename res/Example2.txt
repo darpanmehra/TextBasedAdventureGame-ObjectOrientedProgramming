@@ -1,0 +1,85 @@
+Welcome to the dungeon!
+
+You are in a cave and you have 3 Arrows.
+You find 9 Rubies, 9 Diamonds, 3 Sapphires
+Doors lead to: [EAST, NORTH, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? west
+Moving WEST
+
+You are in a tunnel and you have 3 Arrows.
+Doors lead to: [EAST, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? west
+Moving WEST
+
+You slightly smell something nearby
+You are in a cave and you have 3 Arrows.
+You find 6 Rubies, 10 Diamonds, 10 Sapphires
+Doors lead to: [SOUTH, NORTH, EAST, WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? north
+Moving NORTH
+
+You smell something terrible nearby
+You are in a cave and you have 3 Arrows.
+You find 8 Rubies, 2 Diamonds, 7 Sapphires, 2 Arrows
+Doors lead to: [SOUTH, EAST, NORTH]
+
+Move, Pickup, or Shoot (M-P-S-Q)? S
+Which direction? east
+No.of caves (1-5)? 1
+Shooting in EAST at distance of 1
+
+You smell something terrible nearby
+You are in a cave and you have 2 Arrows.
+You find 8 Rubies, 2 Diamonds, 7 Sapphires, 2 Arrows
+Doors lead to: [SOUTH, EAST, NORTH]
+
+Move, Pickup, or Shoot (M-P-S-Q)? S
+Which direction? east
+No.of caves (1-5)? 1
+Shooting in EAST at distance of 1
+
+You slightly smell something nearby
+You are in a cave and you have 1 Arrows.
+You find 8 Rubies, 2 Diamonds, 7 Sapphires, 2 Arrows
+Doors lead to: [SOUTH, EAST, NORTH]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? east
+Moving EAST
+
+You see a dead monster here.
+You are in a cave and you have 1 Arrows.
+You find 4 Rubies, 6 Diamonds, 3 Sapphires, 1 Arrows
+Doors lead to: [WEST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? west
+Moving WEST
+
+You slightly smell something nearby
+You are in a cave and you have 1 Arrows.
+You find 8 Rubies, 2 Diamonds, 7 Sapphires, 2 Arrows
+Doors lead to: [SOUTH, EAST, NORTH]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? north
+Moving NORTH
+
+You smell something terrible nearby
+You are in a cave and you have 1 Arrows.
+You find 4 Rubies, 7 Diamonds, 8 Sapphires, 3 Arrows
+Doors lead to: [SOUTH, NORTH, EAST]
+
+Move, Pickup, or Shoot (M-P-S-Q)? M
+Move where? east
+Moving EAST
+
+Game Over!
+Chomp, chomp, chomp, you are eaten by an Otyugh!
+Better luck next time.

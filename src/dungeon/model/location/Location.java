@@ -119,8 +119,20 @@ public class Location implements ILocation {
   @Override
   public void setTreasure() {
     if (isCave()) {
+      if (this.treasure == null) {
+        ITreasure treasure = new Treasure(random);
+        treasure.initializeTreasure();
+        this.treasure = treasure;
+      }
+    }
+  }
+
+  @Override
+  public void addArrow() {
+    if (this.treasure == null) {
       this.treasure = new Treasure(random);
     }
+    treasure.addArrow();
   }
 
   @Override
@@ -131,9 +143,7 @@ public class Location implements ILocation {
     if (this.treasure == null) {
       return null;
     }
-    if (this.treasure.getTreasure().containsKey(type)) {
-      this.treasure.getTreasure().put(type, this.treasure.getTreasure().get(type) - 1);
-    }
+    treasure.removeTreasure(type);
     return this.treasure;
   }
 
@@ -186,6 +196,11 @@ public class Location implements ILocation {
   @Override
   public void setMonster() {
     this.monster = new Monster();
+  }
+
+  @Override
+  public boolean hasMonster() {
+    return this.monster != null && this.monster.isAlive();
   }
 
 }

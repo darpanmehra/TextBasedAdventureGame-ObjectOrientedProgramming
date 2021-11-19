@@ -4,32 +4,22 @@ package dungeon.controller.commands;
 import dungeon.model.IGameState;
 import dungeon.model.directions.Direction;
 
-
+/**
+ * This class represents a move command.
+ */
 public class Move implements ICommand {
+
   private Direction d;
 
-  public Move(String input) {
-    if (input == null) {
+  /**
+   * Constructor for Move command.
+   * @param direction Direction the direction to move in
+   */
+  public Move(Direction direction) {
+    if (direction == null) {
       throw new IllegalArgumentException("Direction cannot be null");
     }
-
-    input = input.toUpperCase();
-    switch (input) {
-      case "NORTH":
-        d = Direction.NORTH;
-        break;
-      case "SOUTH":
-        d = Direction.SOUTH;
-        break;
-      case "EAST":
-        d = Direction.EAST;
-        break;
-      case "WEST":
-        d = Direction.WEST;
-        break;
-      default:
-        throw new IllegalArgumentException("Invalid direction");
-    }
+    this.d = direction;
   }
 
   @Override
@@ -39,4 +29,5 @@ public class Move implements ICommand {
     }
     model.movePlayer(this.d);
   }
+
 }

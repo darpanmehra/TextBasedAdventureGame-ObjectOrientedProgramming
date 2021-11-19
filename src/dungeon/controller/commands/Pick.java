@@ -3,36 +3,23 @@ package dungeon.controller.commands;
 import dungeon.model.IGameState;
 import dungeon.model.treasure.TreasureType;
 
+/**
+ * This class represents a pick command.
+ */
 public class Pick implements ICommand {
 
   private final TreasureType treasureType;
 
-  public Pick(String input) {
-    if (input == null) {
-      throw new IllegalArgumentException("Direction cannot be null");
+  /**
+   * Constructor for the pick command.
+   *
+   * @param treasureType The treasure type to pick.
+   */
+  public Pick(TreasureType treasureType) {
+    if (treasureType == null) {
+      throw new IllegalArgumentException("Treasure type cannot be null");
     }
-
-    input = input.toLowerCase();
-    switch (input) {
-      case "rubies":
-      case "ruby":
-        treasureType = TreasureType.RUBIES;
-        break;
-      case "diamonds":
-      case "diamond":
-        treasureType = TreasureType.DIAMONDS;
-        break;
-      case "sapphire":
-      case "sapphires":
-        treasureType = TreasureType.SAPPHIRES;
-        break;
-      case "arrow":
-      case "arrows":
-        treasureType = TreasureType.ARROWS;
-        break;
-      default:
-        throw new IllegalArgumentException("Invalid treasure type");
-    }
+    this.treasureType = treasureType;
   }
 
   @Override
@@ -42,4 +29,5 @@ public class Pick implements ICommand {
     }
     model.pickTreasureFromCurrentLocation(treasureType);
   }
+
 }

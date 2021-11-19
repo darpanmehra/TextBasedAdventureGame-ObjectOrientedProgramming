@@ -12,9 +12,11 @@ import java.util.Set;
 import dungeon.model.GameState;
 import dungeon.model.directions.Direction;
 import dungeon.model.location.ILocation;
+import dungeon.model.treasure.TreasureType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -32,43 +34,24 @@ public class GameTest {
     random.setSeed(50);
     interconnectivity = 0;
     model = new GameState(6, 6, interconnectivity,
-            "nonwrapping", 20, random);
+            "nonwrapping", 20, 5, random);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testSetup() {
     model = new GameState(-10, -10, -1,
-            "nonwrapping", 20, null);
+            "nonwrapping", 20, 5, null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidMonsterCount() {
+    model = new GameState(6, 6, -1,
+            "nonwrapping", 20, 0, random);
   }
 
   @Test
   public void getPlayer() {
     assertEquals("Player", model.getPlayer().getName());
-  }
-
-  @Test
-  public void isGameOver() {
-
-    //When player is at start location
-    assertFalse(model.isGameOver());
-
-    //Move player to end location
-    model.movePlayer(Direction.WEST);
-    model.movePlayer(Direction.SOUTH);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-
-    //Check if the game is over
-    assertTrue(model.isGameOver());
-  }
-
-  @Test
-  public void getAvailableDirectionsFromPlayerPosition() {
-
-    assertEquals("[WEST]",
-            model.getAvailableDirectionsFromPlayerPosition().toString());
-    assertEquals(1, model.getAvailableDirectionsFromPlayerPosition().size());
   }
 
   @Test
@@ -80,52 +63,32 @@ public class GameTest {
 
   @Test
   public void getPlayerEndLocation() {
-    assertEquals("(3, 4)", model.getPlayerEndLocation().toString());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().toString());
   }
 
   @Test
-  public void movePlayer() {
-
-    //Player start position
-    assertEquals("(2, 2)", model.getPlayerStartLocation().toString());
-
-    model.movePlayer(Direction.WEST);
-    assertEquals("(2, 1)", model.getPlayer().getCurrentLocation().toString());
-
-    model.movePlayer(Direction.SOUTH);
-    assertEquals("(3, 1)", model.getPlayer().getCurrentLocation().toString());
-
-    model.movePlayer(Direction.NORTH);
-    assertEquals("(2, 1)", model.getPlayer().getCurrentLocation().toString());
-
-    model.movePlayer(Direction.EAST);
-    assertEquals("(2, 2)", model.getPlayer().getCurrentLocation().toString());
-
+  public void getAvailableDirectionsFromPlayerPosition() {
+    assertEquals("[NORTH]",
+            model.getAvailableDirectionsFromPlayerPosition().toString());
+    assertEquals(1, model.getAvailableDirectionsFromPlayerPosition().size());
   }
 
   @Test
-  public void testPlayerCurrentCLocation() {
-    assertEquals("(2, 2)", model.getPlayerCurrentLocation().toString());
+  public void testPlayerCurrentLocation() {
+    assertEquals("(5, 3)", model.getPlayerCurrentLocation().toString());
   }
 
   @Test
-  public void testInterconnectivity() {
-    ILocation[][] dungeonCopy = model.getDungeon();
-    int totalValidPaths = 0;
-    for (int i = 0; i < dungeonCopy.length; i++) {
-      for (int j = 0; j < dungeonCopy[i].length; j++) {
-        totalValidPaths = totalValidPaths + dungeonCopy[i][j].getNeighbours().size();
-      }
-    }
-    // Paths are bidirectional to totalValidPaths/ 2 gives the path count in the dungeon
-    assertEquals(totalValidPaths / 2,
-            interconnectivity + ((long) dungeonCopy.length * dungeonCopy[0].length - 1));
+  public void testPlayerCurrentLocationStatus() {
+    assertEquals("You slightly smell something nearby\n"
+            + "You are in a cave and you have 3 Arrows.\n" + "You find 1 Arrows\n"
+            + "Doors lead to: [NORTH]\n\n", model.getPlayerCurrentLocationStatus());
   }
 
   @Test
   public void testInterconnectivityGreaterThanZero() {
     model = new GameState(10, 10, 8,
-            "nonwrapping", 20, random);
+            "nonwrapping", 20, 5, random);
 
     ILocation[][] dungeon = model.getDungeon();
     int totalValidPaths = 0;
@@ -145,14 +108,14 @@ public class GameTest {
     boolean correct = true;
     for (int i = 0; i < dungeon.length; i++) {
       for (int j = 0; j < dungeon[i].length; j++) {
-        if (!dungeon[i][j].isCave() && dungeon[i][j].getTreasure() != null) {
+        if (!dungeon[i][j].isCave() && dungeon[i][j].getTreasure() != null
+                && !dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.ARROWS)) {
           correct = false;
         }
       }
     }
     assertTrue(correct);
   }
-
 
   @Test
   public void testTreasurePercentage() {
@@ -163,7 +126,8 @@ public class GameTest {
       for (int j = 0; j < dungeon[i].length; j++) {
         if (dungeon[i][j].isCave()) {
           caves = caves + 1;
-          if (dungeon[i][j].getTreasure() != null) {
+          if (dungeon[i][j].getTreasure() != null
+                  && !dungeon[i][j].getTreasure().getTreasure().containsKey(TreasureType.ARROWS)) {
             cavesThatHaveTreasure = cavesThatHaveTreasure + 1;
           }
         }
@@ -174,115 +138,212 @@ public class GameTest {
   }
 
   @Test
-  public void printPlayerTravelStatus() {
-    model.movePlayer(Direction.WEST);
-    model.movePlayer(Direction.SOUTH);
-    assertEquals("Player has traveled to the following locations: [(2, 2) (2, 1) (3, 1)" +
-            " ].\n" +
-            "Treasures: {}", model.printPlayerTravelStatus());
-  }
-
-  @Test
-  public void playerPickingTreasure() {
-
-    model.movePlayer(Direction.WEST);
-    model.movePlayer(Direction.SOUTH);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-    model.movePlayer(Direction.EAST);
-
-    assertEquals("Player has traveled to the following locations: [(2, 2) (2, 1) (3, 1)"
-            + " (3, 2) (3, 3) (3, 4) ].\n"
-            + "Treasures: {DIAMONDS=3, RUBIES=8, SAPPHIRES=10}", model.printPlayerTravelStatus());
-  }
-
-  @Test
-  public void treasureNullAfterPick() {
+  public void testMonstersLocation() {
+    model = new GameState(6, 6, interconnectivity,
+            "nonwrapping", 20, 15, random);
 
     ILocation[][] dungeon = model.getDungeon();
-    StringBuilder dungeonBuilder = new StringBuilder();
+    boolean correct = true;
     for (int i = 0; i < dungeon.length; i++) {
       for (int j = 0; j < dungeon[i].length; j++) {
-        dungeonBuilder.append(dungeon[i][j].printLocationInfo());
-        dungeonBuilder.append("\n");
+        if (!dungeon[i][j].isCave() && dungeon[i][j].getMonster() != null) {
+          correct = false;
+        }
       }
     }
-    System.out.println(dungeonBuilder);
+    assertTrue(correct);
+  }
 
+  @Test
+  public void testMonsterNumber() {
+    model = new GameState(6, 6, interconnectivity,
+            "nonwrapping", 20, 5, random);
+
+    ILocation[][] dungeon = model.getDungeon();
+    int totalCaves = 0;
+    int cavesThatHaveMonsters = 0;
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (dungeon[i][j].isCave()) {
+          totalCaves = totalCaves + 1;
+          if (dungeon[i][j].getMonster() != null) {
+            cavesThatHaveMonsters = cavesThatHaveMonsters + 1;
+          }
+        }
+      }
+    }
+    assertEquals(5, cavesThatHaveMonsters);
+  }
+
+  @Test
+  public void testPickArrowsFromCurrentLocation() {
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+
+    //Pick additional arrows
+    model.pickTreasureFromCurrentLocation(TreasureType.ARROWS);
+    int playerArrows = model.getPlayer().getTreasures().get(TreasureType.ARROWS);
+    assertEquals(playerArrows, 4);
+  }
+
+  @Test
+  public void shootArrowTwiceToKill() {
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+
+    //Pick additional arrows
+    model.pickTreasureFromCurrentLocation(TreasureType.ARROWS);
+    int playerArrows = model.getPlayer().getTreasures().get(TreasureType.ARROWS);
+    assertEquals(playerArrows, 4);
+    model.movePlayer(Direction.NORTH); //(4, 3)
+
+    //Shoot a monster in West cave
+    model.shootArrow(Direction.WEST, 1);
+    model.shootArrow(Direction.WEST, 1);
+    //Check if monster is dead
+    assertEquals(model.getDungeon()[4][2].getMonster().getHealth(), 0);
+  }
+
+  @Test
+  public void testShootArrowToKillButWrongDistance() {
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+
+    //Pick additional arrows
+    model.pickTreasureFromCurrentLocation(TreasureType.ARROWS);
+    int playerArrows = model.getPlayer().getTreasures().get(TreasureType.ARROWS);
+    assertEquals(playerArrows, 4);
+    model.movePlayer(Direction.NORTH); //(4, 3)
+
+    //Shoot a monster in West cave
+    model.shootArrow(Direction.WEST, 1);
+    assertEquals(model.getDungeon()[4][2].getMonster().getHealth(), 50); //First hit
+    model.shootArrow(Direction.WEST, 5); //Second hit misses
+    assertEquals(model.getDungeon()[4][2].getMonster().getHealth(), 50);//Health is same
+    //Check if monster is dead
+    assertEquals(model.getDungeon()[4][2].getMonster().isAlive(), true);
+  }
+
+  @Test
+  public void testArrowsCount() {
+    ILocation[][] dungeon = model.getDungeon();
+    double totalLocations = model.getDungeon().length * model.getDungeon()[0].length;
+    double locationsWithArrows = 0;
+
+    for (int i = 0; i < dungeon.length; i++) {
+      for (int j = 0; j < dungeon[i].length; j++) {
+        if (dungeon[i][j].getTreasure() != null && dungeon[i][j].getTreasure().getTreasure()
+                .containsKey(TreasureType.ARROWS)) {
+          locationsWithArrows = locationsWithArrows + dungeon[i][j].getTreasure().getTreasure()
+                  .get(TreasureType.ARROWS);
+        }
+      }
+    }
+
+    double ans = locationsWithArrows / totalLocations;
+
+    assertEquals(Math.floor(ans * 100.00) >= 20, true);
+  }
+
+  @Test
+  public void isGameOver() {
+
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+
+    //When player is at start location
+    assertFalse(model.isGameOver());
+
+    //Move player to end location
+    model.pickTreasureFromCurrentLocation(TreasureType.ARROWS);
+    model.movePlayer(Direction.NORTH); //(4, 3)
+
+    //Shoot a monster in West cave
+    model.shootArrow(Direction.WEST, 1);
+    model.shootArrow(Direction.WEST, 1);
+    model.movePlayer(Direction.WEST); //(4,2)
+    model.movePlayer(Direction.WEST); //(4,1)
+
+    model.shootArrow(Direction.NORTH, 1);
+    model.shootArrow(Direction.NORTH, 1);
+    model.movePlayer(Direction.NORTH); //(3,1)
+    model.movePlayer(Direction.WEST); //(3,0) - End of dungeon
+
+    //Check if the game is over
+    assertTrue(model.isGameOver());
+  }
+
+  @Test
+  public void testMonsterInEndLocation() {
+    ILocation end = model.getPlayerEndLocation();
+    assertEquals("Otyugh", end.getMonster().getName());
+    assertEquals(end.getMonster().getHealth(), 100);
+  }
+
+  @Test
+  public void testMonsterNeverAtStartLocation() {
+    ILocation start = model.getPlayerStartLocation();
+    assertNull(start.getMonster());
+  }
+
+  @Test
+  public void testPlayerStartsWith3Arrows() {
+    int expectedCount = model.getPlayer().getTreasures().get(TreasureType.ARROWS);
+    assertEquals(expectedCount, 3);
+  }
+
+  @Test
+  public void testArrowPassesThroughTunnelAndChangesDirection() {
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+
+    //Shoot north from start location
+    //goes through tunnel (4, 3) changes direction to west (4, 2) and hits the monster there
+    model.shootArrow(Direction.NORTH, 1);
+    assertEquals(model.getDungeon()[4][2].getMonster().getHealth(), 50);
+  }
+
+  @Test
+  public void testArrowPassesThroughTunnelAndChangesDirectionMissesMonster() {
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+
+    //Shoot north from start location
+    //goes through tunnel (4, 3) changes direction to west (4, 2) and misses the monster there
+    // as it travels 5 caves which are (4, 2) - cave, (4,1), (3,1)- cave
+    //the arrow hits the monster in cave (3,1) where it stops
+    model.shootArrow(Direction.NORTH, 2);
+    assertEquals(model.getDungeon()[4][2].getMonster().getHealth(), 100);
+    assertEquals(model.getDungeon()[3][1].getMonster().getHealth(), 50);
+  }
+
+  @Test
+  public void testTreasureCountDecreasesAfterPick() {
+    assertEquals("(5, 3)", model.getPlayerStartLocation().getName());
+    assertEquals("(3, 0)", model.getPlayerEndLocation().getName());
+    model.movePlayer(Direction.NORTH);
     model.movePlayer(Direction.WEST);
-    model.movePlayer(Direction.SOUTH);
-    model.movePlayer(Direction.WEST);
-    model.movePlayer(Direction.NORTH); // goes to (2, 0) and collects treasure
-    assertEquals("Player has traveled to the following locations: [(2, 2) (2, 1) " +
-            "(3, 1) (3, 0) (2, 0) ].\n"
-            + "Treasures: {DIAMONDS=9, RUBIES=6, SAPPHIRES=9}", model.printPlayerTravelStatus());
-
-    model.movePlayer(Direction.SOUTH); // Go back to (3, 0)
-    model.movePlayer(Direction.NORTH); // goes to (2, 0) -comes back to same location where treasure
-
-    assertEquals("Player has traveled to the following locations: [(2, 2) (2, 1) (3, 1)"
-            + " (3, 0) (2, 0) (3, 0) (2, 0) ].\n"
-            + "Treasures: {DIAMONDS=9, RUBIES=6, SAPPHIRES=9}", model.printPlayerTravelStatus());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testIllegalMove() {
-    model.movePlayer(Direction.NORTH); // Can't move to NORTH as it's a wall
+    int expectedCount = model.getPlayer().getCurrentLocation().getTreasure()
+            .getTreasure().get(TreasureType.DIAMONDS);
+    assertEquals(expectedCount, 3);
+    //Pick up treasure - arrows
+    model.pickTreasureFromCurrentLocation(TreasureType.DIAMONDS);
+    //Check if treasure count decreases after pick
+    expectedCount = model.getPlayer().getCurrentLocation().getTreasure()
+            .getTreasure().get(TreasureType.DIAMONDS);
+    assertEquals(expectedCount, 2);
   }
 
   @Test
-  public void dungeonCreationCorrectness() {
-    ILocation[][] dungeonCopy = model.getDungeon();
-    int totalValidPaths = 0;
-    for (int i = 0; i < dungeonCopy.length; i++) {
-      for (int j = 0; j < dungeonCopy[i].length; j++) {
-        totalValidPaths = totalValidPaths + dungeonCopy[i][j].getNeighbours().size();
-      }
-    }
-    assertEquals((totalValidPaths / 2),
-            (long) dungeonCopy.length * dungeonCopy[0].length - 1);
-  }
+  public void test50RealRandomGames() {
+    //Creating a random maze creation 100 times
+    //checking if the path length is correct (>=5)
 
-  @Test
-  public void dungeonCreationWithHighInterConnectivity() {
-    model = new GameState(10, 10, 4,
-            "nonwrapping", 20, random);
-
-    ILocation[][] dungeonCopy = model.getDungeon();
-    int totalValidPaths = 0;
-    for (int i = 0; i < dungeonCopy.length; i++) {
-      for (int j = 0; j < dungeonCopy[i].length; j++) {
-        totalValidPaths = totalValidPaths + dungeonCopy[i][j].getNeighbours().size();
-      }
-    }
-    assertEquals((totalValidPaths / 2),
-            4 + (long) dungeonCopy.length * dungeonCopy[0].length - 1);
-  }
-
-  @Test
-  public void dungeonCreationWithVeryHighInterconnectivity() {
-    model = new GameState(6, 6, 1000000,
-            "nonwrapping", 20, random);
-    ILocation[][] dungeonCopy = model.getDungeon();
-    int totalValidPaths = 0;
-    for (int i = 0; i < dungeonCopy.length; i++) {
-      for (int j = 0; j < dungeonCopy[i].length; j++) {
-        totalValidPaths = totalValidPaths + dungeonCopy[i][j].getNeighbours().size();
-      }
-    }
-    //All paths open from each location
-    assertEquals(120, (totalValidPaths));
-  }
-
-  @Test
-  public void testPathLength() {
-    //Creating a random maze creation 100 times and checking if the path length is correct (>=5) on
-    //each run
     random = new Random();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 50; i++) {
       model = new GameState(random.nextInt(94) + 6,
               random.nextInt(94) + 6, random.nextInt(10000000),
-              "wrapping", 20, random);
+              "wrapping", 20, 5, random);
       ILocation start = model.getPlayerStartLocation(); // Selects a random cave as start
       ILocation end = model.getPlayerEndLocation(); // selects a random cave as end
 
@@ -290,7 +351,6 @@ public class GameTest {
 
     }
   }
-
 
   private int checkDistance(ILocation startLocation, ILocation endLocation) {
 
@@ -332,43 +392,4 @@ public class GameTest {
     return -1;
   }
 
-  //Project 4 tests
-
-  @Test
-  public void testMonstersLocation(){
-    model = new GameState(6, 6, interconnectivity,
-            "nonwrapping", 20, 15, random);
-
-    ILocation[][] dungeon = model.getDungeon();
-    boolean correct = true;
-    for (int i = 0; i < dungeon.length; i++) {
-      for (int j = 0; j < dungeon[i].length; j++) {
-        if (!dungeon[i][j].isCave() && dungeon[i][j].getMonster() != null) {
-          correct = false;
-        }
-      }
-    }
-    assertTrue(correct);
-  }
-
-  @Test
-  public void testMonsterNumber(){
-    model = new GameState(6, 6, interconnectivity,
-            "nonwrapping", 20, 5, random);
-
-    ILocation[][] dungeon = model.getDungeon();
-    int totalCaves = 0;
-    int cavesThatHaveMonsters = 0;
-    for (int i = 0; i < dungeon.length; i++) {
-      for (int j = 0; j < dungeon[i].length; j++) {
-        if (dungeon[i][j].isCave()) {
-          totalCaves = totalCaves + 1;
-          if (dungeon[i][j].getMonster() != null) {
-            cavesThatHaveMonsters = cavesThatHaveMonsters + 1;
-          }
-        }
-      }
-    }
-    assertEquals(5, cavesThatHaveMonsters);
-  }
 }

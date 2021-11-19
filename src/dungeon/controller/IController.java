@@ -1,10 +1,13 @@
 package dungeon.controller;
 
-import java.io.IOException;
-
-import dungeon.model.IGameState;
-
+/**
+ * Interface for the controller.
+ */
 public interface IController {
 
-  void playGame() throws IOException;
+  /**
+   * Starts the command of the game.
+   */
+  void playGame();
+
 }
